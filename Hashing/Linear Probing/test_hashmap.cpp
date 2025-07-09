@@ -1,24 +1,7 @@
 #include <iostream>
 #include "HashMap.h"
-#include "Hashers.h"
-#include "Person.h"
-
-// Keys : What will be used to know where the value
-// value: The Data itself - This Can Be pair<key,value>
-// Hash Table : Where are of this will located
-// Hashing:
-    // - Hash Code : Turn Something to Integer (key)
-        // - There is A lot - Different From Type To Type std::hash<type> Support a lot 
-    // - Compress Function : Compress it to fit in hash table 
-        // - Division Method: |k|%N 
-        // - MAD Method: |aK+b|%N <- Better
-// Map : The Whole Thing as ADT
-// Open Addressing : More Space Other Than Hash Table - Like Bucket
-// Load Factor : How Many Values / Table Size - Where Each Bucket Contain this Much (At Ideal Case Of Course)
-// Closed Addressing : In Hash Table
-// Composition Pattern : Object Composed Of More Objects - Pair Tuple
-
-
+#include "../Hashers.h"
+#include "../Person.h"
 
 // NOT ME - IT'S AI GENERATED
 void test_int_string_hashmap() {

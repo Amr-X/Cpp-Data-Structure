@@ -1,34 +1,31 @@
 #pragma once
 #include <vector>
-#include <list>
-#include "Entry.h"
-
-// If We Will Take Any Kind of Key -> We Have To Know How To Hash It
+#include "../Entry.h"
+// Still Working ON.....
 template <typename Key, typename Value, typename Hasher = std::hash<Key>>
 class HashMap{
-    typedef Entry<Key,Value> Entry; // Making const Key Confuse Me
+    using Entry<Key,Value> = Entry; 
 
 public:
     HashMap()
-    :m_hashTable{},m_hasher{},m_size{0}{
-        m_hashTable.resize(10);
+    :m_hashTable{},
+     m_hasher{},
+     m_size{0}
+    {
+        m_hashTable.resize(20); // Note: Use half of it only - lambda <= 0.5
     }
     
     size_t size() const{
-        return m_size;
+        return m_hashTable.size();
     }
     bool isEmpty() const{
-        return m_size == 0;
+        return m_hashTable.empty();
     }
     
-    Hasher& getHashFunction() const{
-        return m_hasher;
+    Value& insert(const Key& key,const Value& value){
+        return insert(key,value,hash(key));
     }
 
-    Value& insert(const Key& key,const Value& value){
-        size_t hashValue = hash(key);
-        return insert(key,value,hashValue);
-    }
     Value& operator[] (const Key& key){
         size_t hashValue = hash(key);
         for (Entry& entry : m_hashTable[hashValue])
@@ -45,7 +42,7 @@ public:
 private:
     // Compress Function - Division - Simple
     size_t hash(const Key& key){
-        return m_hasher(key) % m_hashTable.size(); // 
+        return m_hasher(key) % m_hashTable.capacity(); // 
     }
     Value& insert(const Key& key,const Value& value,int hashValue){
         m_hashTable[hashValue].emplace_back(key,value);
@@ -54,8 +51,6 @@ private:
     }
 
     // Data Members
-    std::vector<std::list<Entry>> m_hashTable{};
-    Hasher m_hasher{}; // Functors give you the flexibility of functions + the ability to store state + work as template parameters
-    size_t m_size{}; // Needed - It's not equal to vector.size()
+    std::vector<Entry> m_hashTable{};
 };
 
