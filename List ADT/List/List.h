@@ -1,5 +1,5 @@
 /*
-    - Doubly Linked List Implementation
+    - Doubly Linked List Implementation With Iterator Pattern
 */
 #pragma once
 
@@ -36,6 +36,18 @@ private:
             m_pos = m_pos->m_next;
             return *this;
         } 
+        Iterator& operator--(){ 
+            m_pos = m_pos->m_prev;
+            return *this;
+        } 
+        Iterator operator-(size_t i) const{
+            node* curr = m_pos;
+            for (size_t j = 0; j < i; j++)
+            {
+               curr = curr->m_prev; 
+            }
+            return {curr};
+        }
         Type& operator*(){
             return m_pos->m_data;
         }
@@ -59,24 +71,33 @@ public:
         }
         // Remove This and Use Clear()
     }
+
     List(const List& list)
     :List(){
-        for (auto &element : list) // I Don't Get This One - Am I Counting On How Compiler Do This - Or How The Standard Made it?
+        for (const Type &element : list) // I Don't Get This One - Am I Counting On How Compiler Do This - Or How The Standard Made it?
         {
-            insert(element);
+            insert_back(element);
         }
     }
     List(List&& list)
     :m_first_node{list.m_first_node},m_last_node{list.m_last_node}{
         list.m_first_node = list.m_last_node = nullptr;
+        m_size = list.m_size;
     }
     List& operator=(const List& list){
         // Interesting - Different Sizes - Can Just Delete and Do It All Over Again
+        if(this == &list) return *this; // A MUST DON"T FORGET
+        clear();
 
+        for (const Type &element : list) 
+        {
+            insert(element);
+        }
+        return *this;
     }
     List& operator=(List&& list){
-        //        ~List(); // Why UB?
-        if(*this == &list) return *this; // A MUST DON"T FORGET
+        //        ~List(); // Why UB? Aha, Data Members After That Are Gone
+        if(this == &list) return *this; // A MUST DON"T FORGET
         // Delete Me
         clear();
         // Yes! Give Me it all
@@ -100,13 +121,48 @@ public:
         node* new_node = new node(prev,to_insert_value,next);
         next->m_prev = new_node;
         prev->m_next = new_node;
+        m_size++;
         return {new_node};
     }
-    Iterator insert(const Type& to_insert_value){
+    Iterator insert_back(const Type& to_insert_value){
         return insert(end(),to_insert_value);
     }
-    bool clear(){ // With Iterator
-        return false;
+    Iterator insert_front(const Type& to_insert_value){
+        return insert(begin(),to_insert_value);
+    }
+    void erase(const Iterator& pos){ // Invalidate The Iterator
+        if(empty()) return;
+        node* current = pos.m_pos;
+        node* next = current->m_next;
+        node* prev = current->m_prev;
+        next->m_prev = prev;
+        prev->m_next = next;
+        delete current; m_size--;
+    }
+    void erase(const Iterator& first_pos,const Iterator& second_pos){
+        Iterator temp = first_pos;
+        while(temp != second_pos){
+            erase(temp);
+        }
+    }
+    void erase_front(){
+        erase(begin());
+    }
+    void erase_back(){
+        erase(end()-1);
+    }
+    void clear(){ erase(begin(),end()); }
+    // Misc
+    void reverse(){
+        std::swap(m_first_node,m_last_node);
+        // What I Forgot - The Linking
+        node* left = m_first_node;
+        node* right = m_first_node->m_next;
+        while(right){
+            std::swap(left->m_next,right->m_prev);
+            left = right;
+            right = right->m_next;
+        }
     }
     // Iterator Support
     Iterator begin() const{
@@ -115,9 +171,7 @@ public:
     Iterator end() const{
         return {m_last_node}; 
     }
-
 private:
-  
     node* m_first_node{};
     node* m_last_node{};
     size_t m_size{};
