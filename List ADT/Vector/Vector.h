@@ -104,7 +104,15 @@ public:
         }
         return m_data[index];
     }
-
+    template<typename ...Args>
+    void emplace_back(Args&&... args){
+        if(full()){
+            reserve(m_capacity == 0 ? 1 : 2 * m_capacity);
+        }
+        
+        new (&m_data[m_size]) Type(std::forward<Args>(args)...);
+        ++m_size;
+    }
     
     void insert(size_t index,const Type& to_insert){ // O(n)
         if(!in_range(index)) return;
@@ -210,6 +218,8 @@ private:
     inline bool in_range(size_t index){ // - big number will work in this case <- Problem
         return !(index > m_size);
     } 
+
+    constexpr static size_t INITIAL_CAP = 10;
 
     Type* m_data{};
     size_t m_size{};
