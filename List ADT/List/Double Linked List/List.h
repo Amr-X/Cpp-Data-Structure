@@ -108,6 +108,13 @@ public:
         list.m_first_node = list.m_last_node = nullptr;
         list.m_size = 0;
         return *this; // Chaining
+        
+        /*
+            - I saw this with std::swap() - It's same thing for *this object
+            S
+            - Both Works, Since rhs will be out of scope any way It doesn't matter if it got nothing or what we had
+            - Point Taken: Leave rhs Object in a valid state but unspecified <- We Don't Know What it got after moving it
+        */
     }
     // API
     size_t size() const {return m_size;}
