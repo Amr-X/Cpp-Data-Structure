@@ -158,6 +158,19 @@ public:
     void erase_back(){
         erase(end()-1);
     }
+    Type& front() {
+        return *begin();
+    }
+    const Type& front() const{
+        return *begin();
+    }
+    Type& back() {
+        return *(--end());
+    }
+    const Type& back() const{
+        return *(--end());  
+    }
+
     void clear(){ erase(begin(),end()); }
     // Misc
     void reverse(){
