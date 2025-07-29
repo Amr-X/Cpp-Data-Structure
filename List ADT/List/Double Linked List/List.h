@@ -53,6 +53,39 @@ private:
         }
         ~Iterator(){}; // It's Not Iterator Resource
     };
+    class Reverse_Iterator
+    {
+        friend class List;
+    private:
+        node* m_pos;
+        Reverse_Iterator(node* pos):m_pos{pos}{}; 
+    public:
+        bool operator==(const Iterator& rhs) const{
+            return m_pos == rhs.m_pos; 
+        }
+        bool operator!=(const Iterator& rhs) const{
+            return !(*this == rhs); 
+        }
+        Reverse_Iterator& operator++(){ 
+            m_pos = m_pos->m_prev;
+            return *this;
+        } 
+        Reverse_Iterator& operator--(){ 
+            m_pos = m_pos->m_next;
+            return *this;
+        } 
+        Reverse_Iterator operator-(size_t i) const{
+            node* curr = m_pos;
+            for (size_t j = 0; j < i; j++)
+            {
+               curr = curr->m_prev; 
+            }
+            return {curr};
+        }
+        Type& operator*(){
+            return m_pos->m_data;
+        }
+    };
 public:
     // The Five Rule
     List() // Dummy Nodes - Makes it easier
