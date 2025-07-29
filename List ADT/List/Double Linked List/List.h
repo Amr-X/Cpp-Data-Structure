@@ -78,7 +78,7 @@ private:
             node* curr = m_pos;
             for (size_t j = 0; j < i; j++)
             {
-               curr = curr->m_prev; 
+               curr = curr->m_next; 
             }
             return {curr};
         }
@@ -223,6 +223,12 @@ public:
     }
     Iterator end() const{
         return {m_last_node}; 
+    }
+    Iterator rbegin() const{
+        return {m_last_node->m_prev;};
+    }
+    Iterator rend() const{
+        return {m_first_node}; 
     }
 private:
     node* m_first_node{};
