@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstddef>
+#include <utility>
 template<typename Type>
 class List{
 private:
@@ -170,6 +171,8 @@ public:
     Iterator insert_front(const Type& to_insert_value){
         return insert(begin(),to_insert_value);
     }
+
+    // TO DO: Validate And Return Iterator To After or Before Currently Deleted Node
     void erase(const Iterator& pos){ // Invalidate The Iterator
         if(empty()) return;
         node* current = pos.m_pos;
@@ -219,16 +222,16 @@ public:
     }
     // Iterator Support
     Iterator begin() const{
-        return {m_first_node->m_next};
+        return m_first_node->m_next;
     }
     Iterator end() const{
-        return {m_last_node}; 
+        return m_last_node;
     }
     Iterator rbegin() const{
-        return {m_last_node->m_prev;};
+        return m_last_node->m_prev;
     }
     Iterator rend() const{
-        return {m_first_node}; 
+        return m_first_node; 
     }
 private:
     node* m_first_node{};

@@ -20,7 +20,7 @@ public:
     Stack& operator=(const Stack&) = default;
     Stack& operator=(Stack&&) = default;
     // Api
-    size_t size() const{return stack.size();} // Isn't it private? how?
+    size_t size() const{return stack.size();} 
     bool empty() const {return stack.empty();}
 
     void pop(){
