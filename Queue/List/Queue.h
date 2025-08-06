@@ -4,12 +4,15 @@
 #pragma once
 #include <stdexcept>
 #include <cstddef>
-#include "../../List ADT/List/Double Linked List/List.h"
+#include "List ADT/List/Double Linked List/List.h"
 
 template<typename Type>
 class Queue{
 public:
     Queue() = default;
+    // Does the Move Constructor Works Here as Default?
+    // Moving the List Data Member?
+    
     //Api
     size_t size() const {return m_list.size();}
     bool empty() const {return m_list.empty();}
