@@ -57,6 +57,8 @@ public:
     Vector& operator=(const Vector& vec);
     Vector& operator=(Vector&& vec);
 
+    // Look at it now, It's an ADT -> The Operations that operate on the data but, We don't know how it's done
+
     // API
     size_t size() const;
     bool empty() const;
@@ -73,9 +75,9 @@ public:
     void insert(const Iterator& it,const Type& to_insert);
 
     Type erase(size_t index);
-    void erase(const Iterator& it);
+    Iterator erase(const Iterator& it);
 
-    void resize(size_t new_size);
+    void resize(size_t new_size,const Type& to_resize_with = Type{});
     void reserve(size_t new_capacity);
     void clear(); 
 

@@ -4,28 +4,27 @@ Vector<Type>::Vector(size_t initial_size)
         // At Full Logically - Full with Garbage
         for (size_t i = 0; i < initial_size; i++)
         {
-            m_data[i] = Type{}; // Move Works?
+            m_data[i] = Type{}; 
         }
+        // new Type[initial_size] Defaults it for class/structs - so why it's here? for primitive types -> int-0,double0.0
 }
 
 template<typename Type>
-Vector<Type>::~Vector(){ delete[] m_data; }
+Vector<Type>::~Vector(){ delete[] m_data; m_data = nullptr; }
 
 template<typename Type>
 Vector<Type>::Vector(const Vector& vec)
     :m_data{new Type[vec.m_capacity]},m_size{vec.m_size},m_capacity{vec.m_capacity}{
-        // Or, Before Filling anything ... I DON"T KNOW WHICH IS CORRECT
         for (size_t i = 0; i < m_size; i++)
         {
             m_data[i] = vec.m_data[i];
-            // Or Added Here? m_size++; <- This One Maybe
         }
-        // Should Size Be Modified Here After Filling Data?
 }
 
 template<typename Type>
 Vector<Type>::Vector(Vector&& vec)
     :m_data{vec.m_data},m_size{vec.m_size},m_capacity{vec.m_capacity}{ // Don't Fully Get noexcept
+        // Leave it in empty state - So when it get's destroyed don't mess the original (now, vec data) data
         vec.m_data = nullptr;
         vec.m_size = 0;
         vec.m_capacity = 0;
@@ -34,14 +33,15 @@ Vector<Type>::Vector(Vector&& vec)
 template<typename Type>
 Vector<Type>& Vector<Type>::operator=(const Vector& vec){
         delete[] m_data;
-        m_data = new Type[vec.m_capacity];
+
         m_capacity = vec.m_capacity;
-        for (size_t i = 0; i < vec.size; i++)
+        m_size = vec.m_size; 
+        m_data = new Type[m_capacity];
+
+        for (size_t i = 0; i < m_size; i++)
         {
             m_data[i] = vec.m_data[i];
         }
-        // Same As The Copy Constructor Question
-        m_size = vec.m_size; 
         return *this;
 }
 
@@ -90,7 +90,8 @@ void Vector<Type>::emplace_back(Args&&... args){
 
 template<typename Type>
 void Vector<Type>::insert(size_t index,const Type& to_insert){ // O(n)
-        if(!in_range(index)) return;
+        // For insertion, allow index == m_size (insert at end)
+        if(index > m_size) return;
         if(full()){reserve(2*m_capacity);}
         // Did I mention Amortized Time Complexity? No? Okay It's O(n) Amortized.
         // What the hell that means -> Think of it this way 
@@ -111,12 +112,6 @@ void Vector<Type>::insert(size_t index,const Type& to_insert){ // O(n)
         m_size++;
 }
 
-template<typename Type>
-void Vector<Type>::insert(const Iterator& it,const Type& to_insert){
-        // Iterator doesn't have any info of how big the vector is
-        // All it Knows Im Pointing at this location in Memory
-        // So, I Can't Shift Elements - We Could Replace Though..
-}
 
 template<typename Type>
 Type Vector<Type>::erase(size_t index){
@@ -134,12 +129,19 @@ Type Vector<Type>::erase(size_t index){
 }
 
 template<typename Type>
-void Vector<Type>::erase(const Iterator& it){
-        // Same Here
+typename Vector<Type>::Iterator Vector<Type>::erase(const Iterator& it) {
+    // Assuming Valid Iterator
+    size_t index = (size_t)(it - m_data); // Get index from iterator
+
+    erase(index);
+
+    // Next valid position
+    // Don't forget if it's last it will be index is not valid, return end() if that happens
+    return (index < m_size)?&m_data[index]:end();
 }
 
 template<typename Type>
-void Vector<Type>::resize(size_t new_size){
+void Vector<Type>::resize(size_t new_size,const Type& to_resize_with){
         // Grow or Shrink
         if(new_size <= m_size){
             // Shrink
@@ -147,12 +149,15 @@ void Vector<Type>::resize(size_t new_size){
             return;
         }
         // Grow
+
+        // Want more than what we have?
         if(new_size > m_capacity){
-            reserve(2*new_size); // Double What He Wants - Not What We have
+            reserve(new_size); // What He Wants - Not What We have
         }
+        // Assign new places to what user wants
         for (size_t i = m_size; i < new_size; i++)
         {
-            m_data[i] = Type{}; // Move Will Work here? Yes
+            m_data[i] = to_resize_with; 
         }
         m_size = new_size;
 }
@@ -160,12 +165,14 @@ void Vector<Type>::resize(size_t new_size){
 template<typename Type>
 void Vector<Type>::reserve(size_t new_capacity){
         if(new_capacity <= m_capacity){return;}
-        Type* new_data = new Type[new_capacity];
+
+        delete[] m_data;
+        m_data = new Type[new_capacity];
+
         for (size_t i = 0; i < m_size; i++)
         {
-            new_data[i] = m_data[i];
+            m_data[i] = m_data[i];
         }
-        delete[] m_data;
         m_capacity = new_capacity;
         // Same Size
 }
@@ -177,7 +184,10 @@ void Vector<Type>::clear(){
         // Or, Delete Space Also?
 
         // Option 1
+        // This is what the user expects - We don't want to reallocate and start reversing again
         m_size = 0;
+        // Option 2
+        // Make a shrink_to_fit function 
 } 
 
 template<typename Type>
@@ -228,5 +238,5 @@ typename Vector<Type>::Iterator Vector<Type>::end(){return m_data + m_size;}
 
 template<typename Type>
 inline bool Vector<Type>::in_range(size_t index){ // - big number will work in this case <- Problem
-        return !(index > m_size);
+        return index < m_size;
 } 
