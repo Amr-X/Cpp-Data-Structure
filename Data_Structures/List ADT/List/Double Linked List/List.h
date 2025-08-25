@@ -89,7 +89,7 @@ private:
     };
 public:
     // The Five Rule
-    List() // Dummy Nodes - Makes it easier
+    List() // Dummy Nodes - Makes it easier => Best Choice to do
     :m_first_node{new node()}
     ,m_last_node{new node()}
     {
@@ -103,29 +103,29 @@ public:
             m_first_node = m_first_node->m_next;
             delete temp;
         }
-        // Remove This and Use Clear()
+        m_last_node = nullptr; m_size = 0;
     }
 
     List(const List& list)
     :List(){
-        for (const Type &element : list) // I Don't Get This One - Am I Counting On How Compiler Do This - Or How The Standard Made it?
+        //  standard behavior defined by the C++ language - Once you Have the iterator pattern..
+        for (const Type &element : list) 
         {
             insert_back(element);
         }
     }
     List(List&& list)
-    :m_first_node{list.m_first_node},m_last_node{list.m_last_node}{
+    :m_first_node{list.m_first_node},m_last_node{list.m_last_node},m_size{list.m_size}{
         list.m_first_node = list.m_last_node = nullptr;
-        m_size = list.m_size;
     }
     List& operator=(const List& list){
         // Interesting - Different Sizes - Can Just Delete and Do It All Over Again
         if(this == &list) return *this; // A MUST DON"T FORGET
-        clear();
 
+        clear();
         for (const Type &element : list) 
         {
-            insert(element);
+            insert_back(element);
         }
         return *this;
     }
@@ -157,6 +157,7 @@ public:
     Iterator insert(const Iterator& position,const Type& to_insert_value){
         // Can't Insert At Position Ofc, But Before => Like at .end() is before it
         // So, Question in My Mind For A lot of Time, I Use Iterator Here or node*?
+        // That is a design problem => Use node* for internal Implementation like here - Use Iterator For public API
         node* next = position.m_pos;
         node* prev = next->m_prev;
         node* new_node = new node(prev,to_insert_value,next);
@@ -172,20 +173,26 @@ public:
         return insert(begin(),to_insert_value);
     }
 
-    // TO DO: Validate And Return Iterator To After or Before Currently Deleted Node
-    void erase(const Iterator& pos){ // Invalidate The Iterator
-        if(empty()) return;
+    // Validate And Return Iterator To The Currently Valid Node (The one after it)
+    Iterator erase(const Iterator& pos){ // Invalidate The Iterator
+        if(empty()) return end();
         node* current = pos.m_pos;
         node* next = current->m_next;
         node* prev = current->m_prev;
         next->m_prev = prev;
         prev->m_next = next;
         delete current; m_size--;
+        return next;
     }
     void erase(const Iterator& first_pos,const Iterator& second_pos){
+        // Data Integrity?
+        // What if I was passed erase(.begin()-1,..)? 
+        // What now?
+        // Passing an invalid iterator (like .begin()-1) to erase is undefined behavior.
+        // The user is responsible for passing valid iterators.
         Iterator temp = first_pos;
         while(temp != second_pos){
-            erase(temp);
+            temp = erase(temp); // Used it here - Fixed
         }
     }
     void erase_front(){
@@ -207,19 +214,7 @@ public:
         return *(--end());  
     }
 
-    void clear(){ erase(begin(),end()); }
-    // Misc
-    void reverse(){
-        std::swap(m_first_node,m_last_node);
-        // What I Forgot - The Linking
-        node* left = m_first_node;
-        node* right = m_first_node->m_next;
-        while(right){
-            std::swap(left->m_next,right->m_prev);
-            left = right;
-            right = right->m_next;
-        }
-    }
+    void clear(){ erase(begin(),end());}
     // Iterator Support
     Iterator begin() const{
         return m_first_node->m_next;
